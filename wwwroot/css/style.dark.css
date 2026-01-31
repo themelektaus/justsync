@@ -65,13 +65,13 @@ header h1 {
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
-/* Status colors for dark mode */
-.status-left-only { background: #1a3d2e; }
-.status-right-only { background: #4d3510; }
-.status-left-newer { background: #1a3a52; }
-.status-right-newer { background: #4d1a1f; }
-.status-different { background: #4d4410; }
-.status-identical { background: var(--gray-100); color: var(--gray-500); }
+/* Status colors for dark mode - applied to file/folder titles */
+.status-left-only .file-title { color: var(--success); }
+.status-right-only .file-title { color: var(--warning); }
+.status-left-newer .file-title { color: var(--primary); }
+.status-right-newer .file-title { color: var(--danger); }
+.status-different .file-title { color: #ffeb80; }
+.status-identical .file-title { color: var(--gray-500); }
 
 /* Diff badges for dark mode */
 .diff-left-only {

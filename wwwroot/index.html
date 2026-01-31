@@ -76,6 +76,9 @@
                 <button class="close-btn" onclick="closeBrowser()">&times;</button>
             </div>
             <div class="browser-path">
+                <button id="goUpBtn" onclick="goUpFolder()" title="Go up one level">
+                    <span class="mdi mdi-arrow-up"></span>
+                </button>
                 <input type="text" id="browserCurrentPath" placeholder="Path" onkeypress="if(event.key==='Enter')navigateTo(this.value)">
                 <button onclick="navigateTo(document.getElementById('browserCurrentPath').value)">Go</button>
             </div>

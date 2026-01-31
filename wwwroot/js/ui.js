@@ -183,7 +183,7 @@ const ui = {
             tr.innerHTML = `
                 <td>
                     <div class="folder-group-title">
-                        <span class="folder-icon">📁</span>
+                        <span class="folder-icon mdi mdi-folder"></span>
                         <span class="folder-path">${item.relativePath}</span>
                         <span class="diff-badge ${diffInfo.class}">${diffInfo.text}</span>
                     </div>
@@ -247,7 +247,7 @@ const ui = {
         tr.innerHTML = `
             <td colspan="4">
                 <div class="folder-group-title">
-                    <span class="folder-icon">📁</span>
+                    <span class="folder-icon mdi mdi-folder"></span>
                     <span class="folder-path">${folderPath || '(root)'}</span>
                 </div>
             </td>

@@ -1,3 +1,28 @@
+/* Inter Font */
+@font-face {
+    font-family: 'Inter';
+    src: url('../fonts/Inter-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../fonts/Inter-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../fonts/Inter-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     /* Base */
     --white: #ffffff;
@@ -49,8 +74,12 @@
     padding: 0;
 }
 
+body, input, button {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    font-size: 1em;
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     background: var(--gray-100);
     color: var(--gray-900);
     line-height: 1.6;
@@ -64,7 +93,7 @@ header {
 }
 
 header h1 {
-    font-size: 1.5rem;
+    font-size: 1.5em;
     font-weight: 600;
 }
 
@@ -106,7 +135,6 @@ main {
     padding: 0.5rem;
     border: 1px solid var(--gray-300);
     border-radius: 4px;
-    font-size: 0.9rem;
 }
 
 .path-input button {
@@ -139,7 +167,6 @@ main {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-weight: 600;
 }
 
 #compareBtn {
@@ -162,14 +189,63 @@ main {
 
 #syncBtn:disabled {
     background: var(--gray-400);
-    cursor: not-allowed;
+    cursor: default;
 }
 
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.75rem;
     cursor: pointer;
+    user-select: none;
+}
+
+/* Material Design Switch Toggle */
+.checkbox-label input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 44px;
+    height: 24px;
+    background: var(--gray-400);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    outline: none;
+}
+
+.checkbox-label input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.checkbox-label input[type="checkbox"]:checked {
+    background: var(--primary);
+}
+
+.checkbox-label input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
+
+.checkbox-label input[type="checkbox"]:hover::before {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.checkbox-label input[type="checkbox"]:active::before {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transform: scale(0.95) translateX(0);
+}
+
+.checkbox-label input[type="checkbox"]:checked:active::before {
+    transform: scale(0.95) translateX(20px);
 }
 
 /* Progress */
@@ -206,7 +282,6 @@ main {
 
 #progressMessage {
     color: var(--gray-600);
-    font-size: 0.9rem;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -241,6 +316,13 @@ main {
     padding: 0.7rem;
     text-align: left;
     border-bottom: 1px solid var(--gray-200);
+    max-width: 200px;
+}
+
+#resultsTable th, #resultsTable th *:not(.diff-badge),
+#resultsTable td, #resultsTable td *:not(.diff-badge) {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #resultsTable th {
@@ -262,17 +344,13 @@ main {
     width: calc((100% - 360px) / 2);
 }
 
-#resultsTable tbody tr:hover {
-    filter: brightness(.95);
-}
-
-/* Status colors */
-.status-left-only { background: #e8f8e8; }
-.status-right-only { background: var(--warning-light); }
-.status-left-newer { background: var(--primary-light); }
-.status-right-newer { background: #fce4ec; }
-.status-different { background: #fff9c4; }
-.status-identical { background: var(--gray-100); color: var(--gray-500); }
+/* Status colors - applied to file/folder titles */
+.status-left-only .file-title { color: var(--success); }
+.status-right-only .file-title { color: var(--warning); }
+.status-left-newer .file-title { color: var(--primary); }
+.status-right-newer .file-title { color: var(--danger); }
+.status-different .file-title { color: #856404; }
+.status-identical .file-title { color: var(--gray-500); }
 
 /* Folder group headers */
 .folder-group-header,
@@ -294,17 +372,18 @@ main {
 .folder-group-title {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.5em;
     color: var(--gray-800);
 }
 
 .folder-icon {
-    font-size: 1rem;
+    font-size: 1.2em;
+    color: var(--warning);
 }
 
 .folder-path {
-    font-size: 0.85rem;
     color: var(--gray-600);
+    font-size: .9em;
 }
 
 .file-title {
@@ -318,7 +397,7 @@ main {
     display: inline-block;
     padding: 0.1rem 0.3rem;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: .8em;
     font-weight: 500;
     white-space: nowrap;
 }
@@ -365,8 +444,8 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem;
-    font-size: 0.8rem;
+    padding: .15em .25em;
+    font-size: 1.2em;
     border: none;
     cursor: pointer;
     transition: .2s ease;
@@ -388,7 +467,6 @@ main {
 }
 
 .action-btn .mdi {
-    font-size: 20px;
     color: var(--gray-800);
 }
 
@@ -463,7 +541,7 @@ main {
 }
 
 .file-meta {
-    font-size: 0.8rem;
+    font-size: .8em;
     color: var(--gray-500);
 }
 
@@ -505,13 +583,13 @@ main {
 }
 
 .modal-header h2 {
-    font-size: 1.2rem;
+    font-size: 1.2em;
 }
 
 .close-btn {
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.5em;
     cursor: pointer;
     color: var(--gray-500);
 }
@@ -537,34 +615,65 @@ main {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: background 0.2s ease;
+    font-weight: 500;
+}
+
+.browser-path button:hover {
+    background: var(--primary-dark);
+}
+
+#goUpBtn {
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-200);
+    color: var(--gray-800);
+}
+
+#goUpBtn:hover {
+    background: var(--gray-300);
+}
+
+#goUpBtn .mdi {
+    font-size: 1.2em;
 }
 
 .browser-list {
     flex: 1;
     overflow-y: auto;
+    padding-block: .5rem;
+    min-height: 400px;
     max-height: 400px;
+    overflow: auto scroll;
 }
 
 .browser-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.7rem 1rem;
+    padding: 0.5rem 1rem;
     cursor: pointer;
     border-bottom: 1px solid var(--gray-100);
 }
 
 .browser-item:hover {
-    background: var(--gray-100);
-}
-
-.browser-item.directory {
-    font-weight: 500;
+    background: var(--gray-200);
 }
 
 .browser-item .icon {
+    font-size: 1.2em;
     width: 20px;
     text-align: center;
+}
+
+.browser-item .mdi-folder {
+    color: var(--warning);
+}
+
+.browser-item .mdi-file-document-outline {
+    color: var(--gray-600);
 }
 
 .modal-footer {
@@ -579,6 +688,7 @@ main {
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .modal-footer button:first-child {
@@ -587,7 +697,24 @@ main {
     border: none;
 }
 
+.modal-footer button:first-child:hover {
+    background: var(--success-dark);
+}
+
+.modal-footer button:first-child:active {
+    transform: scale(0.98);
+}
+
 .modal-footer button:last-child {
     background: var(--gray-200);
+    color: var(--gray-900);
     border: 1px solid var(--gray-300);
+}
+
+.modal-footer button:last-child:hover {
+    background: var(--gray-300);
+}
+
+.modal-footer button:last-child:active {
+    transform: scale(0.98);
 }

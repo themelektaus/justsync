@@ -33,7 +33,7 @@ async function loadBrowserContent(path) {
             const item = document.createElement('div');
             item.className = 'browser-item' + (entry.isDirectory ? ' directory' : '');
             item.innerHTML = `
-                <span class="icon">${entry.isDirectory ? '📁' : '📄'}</span>
+                <span class="icon mdi ${entry.isDirectory ? 'mdi-folder' : 'mdi-file-document-outline'}"></span>
                 <span class="name">${entry.name}</span>
             `;
 
@@ -50,6 +50,32 @@ async function loadBrowserContent(path) {
 
 async function navigateTo(path) {
     await loadBrowserContent(path);
+}
+
+async function goUpFolder() {
+    if (!browserCurrentPath) {
+        // Already at root (drives list)
+        return;
+    }
+
+    // Check if we're at a drive root (e.g., "C:\")
+    const driveRootPattern = /^[A-Za-z]:\\?$/;
+    if (driveRootPattern.test(browserCurrentPath)) {
+        // Go to drives list (empty path)
+        await loadBrowserContent('');
+        return;
+    }
+
+    // Get parent directory
+    const parentPath = browserCurrentPath.replace(/[\\\/][^\\\/]*[\\\/]?$/, '');
+
+    // If parent is empty or just a drive letter, normalize it
+    if (!parentPath || /^[A-Za-z]:?$/.test(parentPath)) {
+        const driveLetter = browserCurrentPath.match(/^[A-Za-z]:/)?.[0];
+        await loadBrowserContent(driveLetter ? driveLetter + '\\' : '');
+    } else {
+        await loadBrowserContent(parentPath);
+    }
 }
 
 function selectCurrentFolder() {

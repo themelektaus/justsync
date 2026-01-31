@@ -33,18 +33,6 @@ public class FolderBrowserService
             throw new DirectoryNotFoundException($"Directory not found: {path}");
         }
 
-        // Add parent directory navigation if not at root
-        if (dirInfo.Parent != null)
-        {
-            entries.Add(new FolderEntry(
-                "..",
-                dirInfo.Parent.FullName,
-                true,
-                0,
-                DateTime.MinValue
-            ));
-        }
-
         // Add directories first
         try
         {
