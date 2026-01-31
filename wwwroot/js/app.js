@@ -199,8 +199,12 @@ function displayResults(results) {
         grouped.get(folder).push(item);
     });
 
-    // Sort folders
-    const sortedFolders = Array.from(grouped.keys()).sort((a, b) => {
+    // Collect all unique folder paths (from grouped files and standalone folders)
+    const allFolderPaths = new Set(grouped.keys());
+    folders.forEach(f => allFolderPaths.add(f.relativePath));
+
+    // Sort all folders alphabetically
+    const sortedFolders = Array.from(allFolderPaths).sort((a, b) => {
         if (a === '' && b !== '') return -1;
         if (a !== '' && b === '') return 1;
         return a.localeCompare(b);
@@ -208,37 +212,39 @@ function displayResults(results) {
 
     // Display grouped results
     sortedFolders.forEach(folder => {
-        const items = grouped.get(folder);
+        const items = grouped.get(folder) || [];
+        const hasChildren = items.length > 0;
 
         // Check if there's a folder entry that matches this folder path
         const folderEntry = folders.find(f => f.relativePath === folder);
 
         if (folderEntry) {
             // Use the folder entry as the header with action dropdown
-            tbody.appendChild(ui.createResultRow(folderEntry, true));
-        } else if (grouped.size > 1) {
+            tbody.appendChild(ui.createResultRow(folderEntry, true, hasChildren));
+        } else if (allFolderPaths.size > 1) {
             // Add plain folder header if there are multiple folders
-            tbody.appendChild(ui.createFolderGroupHeader(folder));
+            tbody.appendChild(ui.createFolderGroupHeader(folder, hasChildren));
         }
 
-        // Sort items: differences first, then identical
-        const sorted = [...items].sort((a, b) => {
-            if (a.type === 'Identical' && b.type !== 'Identical') return 1;
-            if (a.type !== 'Identical' && b.type === 'Identical') return -1;
-            return a.relativePath.localeCompare(b.relativePath);
-        });
+        // Sort items alphabetically by filename
+        if (items.length > 0) {
+            const sorted = [...items].sort((a, b) => {
+                // Extract filename from path
+                const getFilename = (path) => {
+                    const parts = path.split(/[\\\/]/);
+                    return parts[parts.length - 1].toLowerCase();
+                };
 
-        // Add file items
-        sorted.forEach(item => {
-            tbody.appendChild(ui.createResultRow(item, false));
-        });
-    });
+                const nameA = getFilename(a.relativePath);
+                const nameB = getFilename(b.relativePath);
 
-    // Add standalone folders (folders without files in them in the results)
-    const displayedFolders = new Set(sortedFolders);
-    folders.forEach(folderItem => {
-        if (!displayedFolders.has(folderItem.relativePath)) {
-            tbody.appendChild(ui.createResultRow(folderItem, true));
+                return nameA.localeCompare(nameB);
+            });
+
+            // Add file items
+            sorted.forEach(item => {
+                tbody.appendChild(ui.createResultRow(item, false));
+            });
         }
     });
 
@@ -383,6 +389,60 @@ function updateSyncButton() {
     ui.enableSync(actions.length > 0);
 }
 
+// Folder collapse state
+const collapsedFolders = new Set();
+
+function toggleFolder(folderPath) {
+    const isCurrentlyCollapsed = collapsedFolders.has(folderPath);
+    const willBeCollapsed = !isCurrentlyCollapsed;
+
+    if (willBeCollapsed) {
+        collapsedFolders.add(folderPath);
+    } else {
+        collapsedFolders.delete(folderPath);
+    }
+
+    const tbody = document.getElementById('resultsBody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    // Find the folder header row
+    const folderHeaderIndex = rows.findIndex(row =>
+        row.dataset.path === folderPath &&
+        (row.classList.contains('folder-group-header') || row.classList.contains('folder-group-header-plain'))
+    );
+
+    if (folderHeaderIndex === -1) return;
+
+    const folderHeaderRow = rows[folderHeaderIndex];
+
+    // Toggle the chevron icon
+    const toggle = folderHeaderRow.querySelector('.folder-toggle');
+    if (toggle) {
+        if (willBeCollapsed) {
+            toggle.classList.add('collapsed');
+        } else {
+            toggle.classList.remove('collapsed');
+        }
+    }
+
+    // Hide/show all file rows after this folder header until the next folder header
+    for (let i = folderHeaderIndex + 1; i < rows.length; i++) {
+        const row = rows[i];
+
+        // Check if this is a folder header - if yes, stop here
+        const isRowAFolderHeader = row.classList.contains('folder-group-header') ||
+                                    row.classList.contains('folder-group-header-plain');
+
+        if (isRowAFolderHeader) {
+            // Stop - we've reached the next group (could be subfolder or sibling)
+            break;
+        }
+
+        // Toggle visibility of file rows
+        row.style.display = willBeCollapsed ? 'none' : '';
+    }
+}
+
 // Event delegation for action buttons
 document.getElementById('resultsBody').addEventListener('click', (e) => {
     const button = e.target.closest('.action-btn');
@@ -395,3 +455,61 @@ document.getElementById('resultsBody').addEventListener('click', (e) => {
     const path = buttonGroup.dataset.path;
     setAction(path, action);
 });
+
+// Event delegation for folder toggles
+document.getElementById('resultsBody').addEventListener('click', (e) => {
+    const toggle = e.target.closest('.folder-toggle');
+    if (!toggle) return;
+
+    const folderPath = toggle.dataset.folderPath;
+
+    // Check if Shift or Alt key is pressed
+    if (e.ctrlKey || e.shiftKey || e.altKey) {
+        toggleAllFolders();
+    } else {
+        toggleFolder(folderPath);
+    }
+});
+
+function toggleAllFolders() {
+    // Get all folder paths from compareResults (includes hidden folders)
+    const allFolderPaths = new Set();
+
+    compareResults.forEach(item => {
+        const isDirectory = (item.left && item.left.isDirectory) || (item.right && item.right.isDirectory);
+        if (isDirectory) {
+            allFolderPaths.add(item.relativePath);
+        }
+    });
+
+    // Also get folder paths from grouped file results
+    compareResults.forEach(item => {
+        const isDirectory = (item.left && item.left.isDirectory) || (item.right && item.right.isDirectory);
+        if (!isDirectory) {
+            const folder = item.relativePath.includes('\\') || item.relativePath.includes('/')
+                ? item.relativePath.substring(0, Math.max(item.relativePath.lastIndexOf('\\'), item.relativePath.lastIndexOf('/')))
+                : '';
+            allFolderPaths.add(folder);
+        }
+    });
+
+    // Check if all folders are currently collapsed
+    const allCollapsed = Array.from(allFolderPaths).every(folderPath => {
+        return collapsedFolders.has(folderPath);
+    });
+
+    // Toggle all folders
+    allFolderPaths.forEach(folderPath => {
+        if (allCollapsed) {
+            // Expand all
+            if (collapsedFolders.has(folderPath)) {
+                toggleFolder(folderPath);
+            }
+        } else {
+            // Collapse all
+            if (!collapsedFolders.has(folderPath)) {
+                toggleFolder(folderPath);
+            }
+        }
+    });
+}

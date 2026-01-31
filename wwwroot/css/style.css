@@ -386,6 +386,27 @@ main {
     font-size: .9em;
 }
 
+.folder-toggle {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    font-size: 1.2em;
+    color: var(--gray-600);
+}
+
+.folder-toggle:hover {
+    color: var(--gray-800);
+}
+
+.folder-toggle.collapsed {
+    transform: rotate(-90deg);
+}
+
+.folder-toggle-placeholder {
+    display: inline-block;
+    width: 1.2em;
+    font-size: 1.2em;
+}
+
 .file-title {
     display: flex;
     align-items: center;

@@ -129,3 +129,12 @@ header h1 {
 .action-btn.active {
     filter: brightness(1.5);
 }
+
+/* Folder toggle in dark mode */
+.folder-toggle {
+    color: var(--gray-500);
+}
+
+.folder-toggle:hover {
+    color: var(--gray-700);
+}

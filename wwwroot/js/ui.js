@@ -164,7 +164,7 @@ const ui = {
         document.getElementById('syncBtn').disabled = !enabled;
     },
 
-    createResultRow(item, isFolder = false) {
+    createResultRow(item, isFolder = false, hasChildren = true) {
         const tr = document.createElement('tr');
 
         // Check if this is a directory item
@@ -180,9 +180,15 @@ const ui = {
             tr.dataset.path = item.relativePath;
             tr.dataset.type = item.type;
 
+            // Only show toggle if folder has children
+            const toggleHtml = hasChildren
+                ? `<span class="folder-toggle mdi mdi-chevron-down" data-folder-path="${item.relativePath}"></span>`
+                : `<span class="folder-toggle-placeholder"></span>`;
+
             tr.innerHTML = `
                 <td>
                     <div class="folder-group-title">
+                        ${toggleHtml}
                         <span class="folder-icon mdi mdi-folder"></span>
                         <span class="folder-path">${item.relativePath}</span>
                         <span class="diff-badge ${diffInfo.class}">${diffInfo.text}</span>
@@ -241,14 +247,22 @@ const ui = {
         return tr;
     },
 
-    createFolderGroupHeader(folderPath) {
+    createFolderGroupHeader(folderPath, hasChildren = true) {
         const tr = document.createElement('tr');
         tr.className = 'folder-group-header-plain';
+        tr.dataset.path = folderPath;
+
+        // Only show toggle if folder has children
+        const toggleHtml = hasChildren
+            ? `<span class="folder-toggle mdi mdi-chevron-down" data-folder-path="${folderPath}"></span>`
+            : `<span class="folder-toggle-placeholder"></span>`;
+
         tr.innerHTML = `
             <td colspan="4">
                 <div class="folder-group-title">
+                    ${toggleHtml}
                     <span class="folder-icon mdi mdi-folder"></span>
-                    <span class="folder-path">${folderPath || '(root)'}</span>
+                    <span class="folder-path">${folderPath || '*'}</span>
                 </div>
             </td>
         `;
