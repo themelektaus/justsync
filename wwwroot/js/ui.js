@@ -15,6 +15,13 @@ const ui = {
     },
 
     getDiffInfo(diffType, left, right) {
+        // Check if item is ignored
+        const isIgnored = (left && left.isIgnored) || (right && right.isIgnored);
+
+        if (isIgnored) {
+            return { text: 'Ignored', class: 'diff-ignored' };
+        }
+
         switch (diffType) {
             case 'LeftOnly':
                 return { text: 'Only in left', class: 'diff-left-only' };
@@ -67,7 +74,10 @@ const ui = {
         return classMap[diffType] || '';
     },
 
-    getDefaultAction(diffType) {
+    getDefaultAction(diffType, isIgnored) {
+        // Ignored items always default to Skip
+        if (isIgnored) return 'Skip';
+
         switch (diffType) {
             case 'LeftOnly': return 'CopyToRight';
             case 'RightOnly': return 'CopyToLeft';
@@ -78,8 +88,8 @@ const ui = {
         }
     },
 
-    getActionButtons(diffType) {
-        // Always show all buttons, but disable the ones that don't make sense
+    getActionButtons(diffType, isIgnored) {
+        // For ignored items, all buttons except Skip are disabled
         const buttons = [
             {
                 value: 'Skip',
@@ -93,21 +103,21 @@ const ui = {
                 icon: 'mdi-arrow-left',
                 title: 'Copy to left',
                 cssClass: 'action-copy-left',
-                disabled: diffType === 'LeftOnly' || diffType === 'Identical'
+                disabled: isIgnored || diffType === 'LeftOnly' || diffType === 'Identical'
             },
             {
                 value: 'CopyToRight',
                 icon: 'mdi-arrow-right',
                 title: 'Copy to right',
                 cssClass: 'action-copy-right',
-                disabled: diffType === 'RightOnly' || diffType === 'Identical'
+                disabled: isIgnored || diffType === 'RightOnly' || diffType === 'Identical'
             },
             {
                 value: 'Delete',
                 icon: 'mdi-delete-outline',
                 title: diffType === 'LeftOnly' ? 'Delete left' : diffType === 'RightOnly' ? 'Delete right' : 'Delete',
                 cssClass: 'action-delete',
-                disabled: diffType !== 'LeftOnly' && diffType !== 'RightOnly',
+                disabled: isIgnored || (diffType !== 'LeftOnly' && diffType !== 'RightOnly'),
                 actualAction: diffType === 'LeftOnly' ? 'DeleteLeft' : diffType === 'RightOnly' ? 'DeleteRight' : null
             }
         ];
@@ -169,13 +179,16 @@ const ui = {
 
         // Check if this is a directory item
         const isDirectory = (item.left && item.left.isDirectory) || (item.right && item.right.isDirectory);
+        const isIgnored = (item.left && item.left.isIgnored) || (item.right && item.right.isIgnored);
 
         if (isDirectory && isFolder) {
             // This is a folder entry - make it a folder group header with action
-            tr.className = 'folder-group-header ' + this.getStatusClass(item.type);
+            let className = 'folder-group-header ' + this.getStatusClass(item.type);
+            if (isIgnored) className += ' ignored-item';
+            tr.className = className;
             const diffInfo = this.getDiffInfo(item.type, item.left, item.right);
-            const defaultAction = this.getDefaultAction(item.type);
-            const actionButtons = this.getActionButtons(item.type);
+            const defaultAction = this.getDefaultAction(item.type, isIgnored);
+            const actionButtons = this.getActionButtons(item.type, isIgnored);
 
             tr.dataset.path = item.relativePath;
             tr.dataset.type = item.type;
@@ -201,13 +214,15 @@ const ui = {
             `;
         } else {
             // Regular file entry
-            tr.className = this.getStatusClass(item.type);
+            let className = this.getStatusClass(item.type);
+            if (isIgnored) className += ' ignored-item';
+            tr.className = className;
             tr.dataset.path = item.relativePath;
             tr.dataset.type = item.type;
 
             const diffInfo = this.getDiffInfo(item.type, item.left, item.right);
-            const defaultAction = this.getDefaultAction(item.type);
-            const actionButtons = this.getActionButtons(item.type);
+            const defaultAction = this.getDefaultAction(item.type, isIgnored);
+            const actionButtons = this.getActionButtons(item.type, isIgnored);
 
             tr.innerHTML = `
                 <td>

@@ -18,14 +18,14 @@
             <div class="folder-panel">
                 <label>Left Folder</label>
                 <div class="path-input">
-                    <input type="text" id="leftPath" placeholder="Enter path or browse..." value="C:\Temp\Test 1">
+                    <input type="text" id="leftPath" placeholder="Enter path or browse...">
                     <button onclick="openBrowser('left')">Browse</button>
                 </div>
             </div>
             <div class="folder-panel">
                 <label>Right Folder</label>
                 <div class="path-input">
-                    <input type="text" id="rightPath" placeholder="Enter path or browse..." value="C:\Temp\Test 2">
+                    <input type="text" id="rightPath" placeholder="Enter path or browse...">
                     <button onclick="openBrowser('right')">Browse</button>
                 </div>
             </div>
@@ -34,6 +34,9 @@
         <section class="controls">
             <button id="compareBtn" onclick="startCompare()">Compare</button>
             <button id="syncBtn" onclick="startSync()" disabled>Sync</button>
+            <button id="editIgnoreBtn" onclick="openIgnoreEditor()">
+                <span class="mdi mdi-file-eye-outline"></span> Edit .ignore
+            </button>
             <div style="margin: auto; "></div>
             <label class="checkbox-label">
                 <input type="checkbox" id="useChecksum">
@@ -103,6 +106,41 @@
             <div class="modal-footer" id="dialogFooter">
                 <button id="dialogConfirmBtn">OK</button>
                 <button id="dialogCancelBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ignore Editor Modal -->
+    <div id="ignoreEditorModal" class="modal" style="display: none;">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2>Edit .ignore Patterns</h2>
+                <button class="close-btn" onclick="closeIgnoreEditor()">&times;</button>
+            </div>
+            <div class="ignore-editor-body">
+                <div class="ignore-help">
+                    <h3>Pattern Syntax:</h3>
+                    <ul>
+                        <li><code>/Test.txt</code> - File in root only</li>
+                        <li><code>Test.txt</code> - Any file named Test.txt</li>
+                        <li><code>/Test/</code> - Folder in root</li>
+                        <li><code>*.txt</code> - All .txt files</li>
+                        <li><code>/Test/*.txt</code> - All .txt in Test folder</li>
+                        <li><code>/Test/**/*.txt</code> - All .txt in Test and subfolders</li>
+                        <li><code># comment</code> - Comment (ignored)</li>
+                    </ul>
+                </div>
+                <textarea id="ignorePatternsText" rows="15" placeholder="Enter patterns (one per line)..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button onclick="saveIgnorePatterns('left')" class="save-left-btn">
+                    <span class="mdi mdi-content-save"></span> Save to Left
+                </button>
+                <button onclick="saveIgnorePatterns('right')" class="save-right-btn">
+                    <span class="mdi mdi-content-save"></span> Save to Right
+                </button>
+                <div style="margin-left: auto;"></div>
+                <button onclick="closeIgnoreEditor()">Cancel</button>
             </div>
         </div>
     </div>

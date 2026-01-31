@@ -6,5 +6,6 @@ public record FileItem(
     long Size,
     DateTime ModifiedDate,
     bool IsDirectory,
-    string Checksum = null
+    string Checksum = null,
+    bool IsIgnored = false
 );

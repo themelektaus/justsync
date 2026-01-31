@@ -73,5 +73,28 @@ const api = {
     async cancelSync(jobId) {
         const response = await fetch(`${API_BASE}/sync/${jobId}/cancel`, { method: 'POST' });
         return response.json();
+    },
+
+    async getIgnorePatterns(leftPath, rightPath) {
+        const url = `${API_BASE}/ignore/patterns?leftPath=${encodeURIComponent(leftPath)}&rightPath=${encodeURIComponent(rightPath)}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to load ignore patterns');
+        }
+        return response.json();
+    },
+
+    async saveIgnorePatterns(targetPath, patterns) {
+        const response = await fetch(`${API_BASE}/ignore/patterns`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetPath, patterns })
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to save ignore patterns');
+        }
+        return response.json();
     }
 };

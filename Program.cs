@@ -14,6 +14,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddSingleton<FolderBrowserService>();
 builder.Services.AddSingleton<ChecksumService>();
 builder.Services.AddSingleton<JobManager>();
+builder.Services.AddSingleton<IgnoreService>();
 builder.Services.AddSingleton<CompareService>();
 builder.Services.AddSingleton<SyncService>();
 
@@ -40,5 +41,6 @@ app.UseStaticFiles();
 app.MapFolderEndpoints();
 app.MapCompareEndpoints();
 app.MapSyncEndpoints();
+app.MapIgnoreEndpoints();
 
 app.Run();

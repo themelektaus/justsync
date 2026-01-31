@@ -7,6 +7,68 @@ let browserTarget = null; // 'left' or 'right'
 let browserCurrentPath = '';
 let compareResults = [];
 
+// LocalStorage keys
+const STORAGE_KEYS = {
+    LEFT_PATH: 'justsync_left_path',
+    RIGHT_PATH: 'justsync_right_path'
+};
+
+// Initialize app on load
+window.addEventListener('DOMContentLoaded', () => {
+    loadSavedPaths();
+    setupPathChangeListeners();
+});
+
+// Load saved paths from localStorage
+function loadSavedPaths() {
+    const leftPath = localStorage.getItem(STORAGE_KEYS.LEFT_PATH);
+    const rightPath = localStorage.getItem(STORAGE_KEYS.RIGHT_PATH);
+
+    if (leftPath) {
+        document.getElementById('leftPath').value = leftPath;
+    }
+
+    if (rightPath) {
+        document.getElementById('rightPath').value = rightPath;
+    }
+}
+
+// Save paths to localStorage
+function savePaths() {
+    const leftPath = document.getElementById('leftPath').value.trim();
+    const rightPath = document.getElementById('rightPath').value.trim();
+
+    if (leftPath) {
+        localStorage.setItem(STORAGE_KEYS.LEFT_PATH, leftPath);
+    }
+
+    if (rightPath) {
+        localStorage.setItem(STORAGE_KEYS.RIGHT_PATH, rightPath);
+    }
+}
+
+// Setup listeners to save paths when they change
+function setupPathChangeListeners() {
+    const leftPathInput = document.getElementById('leftPath');
+    const rightPathInput = document.getElementById('rightPath');
+
+    leftPathInput.addEventListener('blur', savePaths);
+    rightPathInput.addEventListener('blur', savePaths);
+
+    // Also save when Enter is pressed
+    leftPathInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            savePaths();
+        }
+    });
+
+    rightPathInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            savePaths();
+        }
+    });
+}
+
 // Browser functions
 async function openBrowser(target) {
     browserTarget = target;
@@ -16,8 +78,13 @@ async function openBrowser(target) {
 }
 
 function closeBrowser() {
-    document.getElementById('browserModal').style.display = 'none';
-    browserTarget = null;
+    const modal = document.getElementById('browserModal');
+    modal.classList.add('closing');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.classList.remove('closing');
+        browserTarget = null;
+    }, 200);
 }
 
 async function loadBrowserContent(path) {
@@ -81,6 +148,7 @@ async function goUpFolder() {
 function selectCurrentFolder() {
     if (browserTarget && browserCurrentPath) {
         document.getElementById(browserTarget + 'Path').value = browserCurrentPath;
+        savePaths(); // Save to localStorage
     }
     closeBrowser();
 }
@@ -518,4 +586,61 @@ function toggleAllFolders() {
             }
         }
     });
+}
+
+// Ignore editor functions
+async function openIgnoreEditor() {
+    const leftPath = document.getElementById('leftPath').value.trim();
+    const rightPath = document.getElementById('rightPath').value.trim();
+
+    if (!leftPath || !rightPath) {
+        dialog.alert('Please select both folders first');
+        return;
+    }
+
+    try {
+        const result = await api.getIgnorePatterns(leftPath, rightPath);
+
+        document.getElementById('ignorePatternsText').value =
+            result.patterns.join('\n');
+        document.getElementById('ignoreEditorModal').style.display = 'flex';
+
+        // Log source info
+        const sources = [];
+        if (result.leftSourceFile) sources.push('left');
+        if (result.rightSourceFile) sources.push('right');
+        if (sources.length > 0) {
+            console.log(`Loaded patterns from ${sources.join(' and ')} folder(s)`);
+        }
+    } catch (error) {
+        dialog.error('Error loading patterns: ' + error.message, 'Load Error');
+    }
+}
+
+function closeIgnoreEditor() {
+    const modal = document.getElementById('ignoreEditorModal');
+    modal.classList.add('closing');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        modal.classList.remove('closing');
+    }, 200);
+}
+
+async function saveIgnorePatterns(side) {
+    const leftPath = document.getElementById('leftPath').value.trim();
+    const rightPath = document.getElementById('rightPath').value.trim();
+    const targetPath = side === 'left' ? leftPath : rightPath;
+    const text = document.getElementById('ignorePatternsText').value;
+    const patterns = text.split('\n')
+        .map(p => p.trim())
+        .filter(p => p.length > 0);
+
+    try {
+        await api.saveIgnorePatterns(targetPath, patterns);
+        closeIgnoreEditor();
+        const sideName = side === 'left' ? 'left' : 'right';
+        dialog.success(`Patterns saved to ${sideName} folder.\nRun Compare to apply changes.`);
+    } catch (error) {
+        dialog.error('Error saving patterns: ' + error.message, 'Save Error');
+    }
 }

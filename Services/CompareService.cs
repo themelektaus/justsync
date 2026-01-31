@@ -6,11 +6,13 @@ public class CompareService
 {
     private readonly ChecksumService _checksumService;
     private readonly JobManager _jobManager;
+    private readonly IgnoreService _ignoreService;
 
-    public CompareService(ChecksumService checksumService, JobManager jobManager)
+    public CompareService(ChecksumService checksumService, JobManager jobManager, IgnoreService ignoreService)
     {
         _checksumService = checksumService;
         _jobManager = jobManager;
+        _ignoreService = ignoreService;
     }
 
     public async Task RunCompareAsync(CompareJob job)
@@ -20,8 +22,11 @@ public class CompareService
 
         try
         {
-            var leftFiles = ScanDirectory(job.LeftPath, job.LeftPath);
-            var rightFiles = ScanDirectory(job.RightPath, job.RightPath);
+            // Load and merge ignore patterns
+            var ignorePatterns = _ignoreService.LoadAndMergePatterns(job.LeftPath, job.RightPath);
+
+            var leftFiles = ScanDirectory(job.LeftPath, job.LeftPath, ignorePatterns);
+            var rightFiles = ScanDirectory(job.RightPath, job.RightPath, ignorePatterns);
 
             var allPaths = leftFiles.Keys.Union(rightFiles.Keys).OrderBy(p => p).ToList();
             var results = new List<CompareResultItem>();
@@ -70,14 +75,14 @@ public class CompareService
         }
     }
 
-    private Dictionary<string, FileItem> ScanDirectory(string basePath, string currentPath)
+    private Dictionary<string, FileItem> ScanDirectory(string basePath, string currentPath, IgnorePatterns ignorePatterns)
     {
         var items = new Dictionary<string, FileItem>(StringComparer.OrdinalIgnoreCase);
-        ScanDirectoryRecursive(basePath, currentPath, items);
+        ScanDirectoryRecursive(basePath, currentPath, items, ignorePatterns);
         return items;
     }
 
-    private void ScanDirectoryRecursive(string basePath, string currentPath, Dictionary<string, FileItem> items)
+    private void ScanDirectoryRecursive(string basePath, string currentPath, Dictionary<string, FileItem> items, IgnorePatterns ignorePatterns)
     {
         try
         {
@@ -88,12 +93,18 @@ public class CompareService
                 try
                 {
                     var relativePath = Path.GetRelativePath(basePath, file.FullName);
+
+                    // Check if file is ignored
+                    bool isIgnored = _ignoreService.IsIgnored(relativePath, false, ignorePatterns);
+
                     items[relativePath] = new FileItem(
                         relativePath,
                         file.Name,
                         file.Length,
                         file.LastWriteTimeUtc,
-                        false
+                        false,
+                        null,
+                        isIgnored
                     );
                 }
                 catch (UnauthorizedAccessException) { }
@@ -104,14 +115,21 @@ public class CompareService
                 try
                 {
                     var relativePath = Path.GetRelativePath(basePath, dir.FullName);
+
+                    // Check if directory is ignored
+                    bool isIgnored = _ignoreService.IsIgnored(relativePath, true, ignorePatterns);
+
                     items[relativePath] = new FileItem(
                         relativePath,
                         dir.Name,
                         0,
                         dir.LastWriteTimeUtc,
-                        true
+                        true,
+                        null,
+                        isIgnored
                     );
-                    ScanDirectoryRecursive(basePath, dir.FullName, items);
+
+                    ScanDirectoryRecursive(basePath, dir.FullName, items, ignorePatterns);
                 }
                 catch (UnauthorizedAccessException) { }
             }

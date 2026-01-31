@@ -122,11 +122,15 @@ const dialog = {
             };
 
             const cleanup = () => {
-                modal.style.display = 'none';
-                confirmBtn.removeEventListener('click', onConfirm);
-                cancelBtn.removeEventListener('click', onCancel);
-                document.removeEventListener('keydown', onEscape);
-                modal.removeEventListener('click', onBackdropClick);
+                modal.classList.add('closing');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modal.classList.remove('closing');
+                    confirmBtn.removeEventListener('click', onConfirm);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    document.removeEventListener('keydown', onEscape);
+                    modal.removeEventListener('click', onBackdropClick);
+                }, 200);
             };
 
             // Attach event handlers

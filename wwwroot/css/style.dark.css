@@ -118,13 +118,6 @@ header h1 {
     border-color: var(--gray-300);
 }
 
-.path-input input:focus,
-.browser-path input:focus,
-.mode-selector select:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
 .action-btn {
     filter: brightness(1.3);
 }

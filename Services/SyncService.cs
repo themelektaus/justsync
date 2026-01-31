@@ -26,9 +26,30 @@ public class SyncService
 
         try
         {
-            var actionsToProcess = syncJob.Actions
-                .Where(a => a.Action != ActionType.Skip)
-                .ToList();
+            // Filter out ignored items and skip actions
+            var actionsToProcess = new List<SyncAction>();
+            foreach (var action in syncJob.Actions)
+            {
+                // Skip if action is Skip
+                if (action.Action == ActionType.Skip)
+                    continue;
+
+                // Find the corresponding compare result to check if ignored
+                var compareResult = compareJob.Results?.FirstOrDefault(r =>
+                    r.RelativePath.Equals(action.RelativePath, StringComparison.OrdinalIgnoreCase));
+
+                // Skip if item is ignored
+                if (compareResult != null)
+                {
+                    bool isIgnored = (compareResult.Left != null && compareResult.Left.IsIgnored) ||
+                                   (compareResult.Right != null && compareResult.Right.IsIgnored);
+
+                    if (isIgnored)
+                        continue;
+                }
+
+                actionsToProcess.Add(action);
+            }
 
             int processed = 0;
             int total = actionsToProcess.Count;

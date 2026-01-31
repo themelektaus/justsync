@@ -21,6 +21,15 @@ public static class CompareEndpoints
                 return Results.BadRequest(new { error = $"Right path does not exist: {request.RightPath}" });
             }
 
+            // Check if left and right paths are identical
+            var leftFullPath = Path.GetFullPath(request.LeftPath);
+            var rightFullPath = Path.GetFullPath(request.RightPath);
+
+            if (string.Equals(leftFullPath, rightFullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return Results.BadRequest(new { error = "Left and right paths cannot be the same" });
+            }
+
             var job = jobManager.CreateCompareJob(request.LeftPath, request.RightPath, request.UseChecksum);
 
             // Run comparison in background
