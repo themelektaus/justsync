@@ -44,7 +44,7 @@ async function loadBrowserContent(path) {
             list.appendChild(item);
         });
     } catch (error) {
-        alert('Error browsing: ' + error.message);
+        dialog.error('Error browsing: ' + error.message, 'Browse Error');
     }
 }
 
@@ -92,15 +92,19 @@ async function startCompare() {
     const useChecksum = document.getElementById('useChecksum').checked;
 
     if (!leftPath || !rightPath) {
-        alert('Please select both folders');
+        dialog.alert('Please select both folders');
         return;
     }
 
     try {
         document.getElementById('compareBtn').disabled = true;
+        ui.updateProgress(0, 'Starting comparison...');
         ui.showProgress(true);
         ui.showResults(false);
         ui.enableSync(false);
+
+        // Reset folder collapse state
+        collapsedFolders.clear();
 
         const result = await api.startCompare(leftPath, rightPath, useChecksum);
         currentJobId = result.jobId;
@@ -108,7 +112,7 @@ async function startCompare() {
 
         startPolling();
     } catch (error) {
-        alert('Error: ' + error.message);
+        dialog.error('Error: ' + error.message, 'Compare Error');
         document.getElementById('compareBtn').disabled = false;
         ui.showProgress(false);
     }
@@ -137,7 +141,7 @@ function startPolling() {
                 }
             } else if (status.state === 'Failed') {
                 stopPolling();
-                alert('Job failed: ' + (status.error || 'Unknown error'));
+                dialog.error('Job failed: ' + (status.error || 'Unknown error'), 'Job Failed');
                 resetAfterJob();
             } else if (status.state === 'Cancelled') {
                 stopPolling();
@@ -164,7 +168,7 @@ async function loadCompareResults() {
         ui.showProgress(false);
         document.getElementById('compareBtn').disabled = false;
     } catch (error) {
-        alert('Error loading results: ' + error.message);
+        dialog.error('Error loading results: ' + error.message, 'Load Results Error');
         resetAfterJob();
     }
 }
@@ -265,16 +269,18 @@ async function startSync() {
     const actions = getSelectedActions();
 
     if (actions.length === 0) {
-        alert('No items selected for sync');
+        dialog.alert('No items selected for sync');
         return;
     }
 
-    if (!confirm(`Sync ${actions.length} items?`)) {
+    const confirmed = await dialog.confirm(`Sync ${actions.length} items?`, 'Confirm Sync');
+    if (!confirmed) {
         return;
     }
 
     try {
         document.getElementById('syncBtn').disabled = true;
+        ui.updateProgress(0, 'Starting sync...');
         ui.showProgress(true);
 
         const result = await api.startSync(currentJobId, actions);
@@ -283,7 +289,7 @@ async function startSync() {
 
         startPolling();
     } catch (error) {
-        alert('Error: ' + error.message);
+        dialog.error('Error: ' + error.message, 'Sync Error');
         ui.showProgress(false);
         document.getElementById('syncBtn').disabled = false;
     }
@@ -363,7 +369,7 @@ function getSelectedActions() {
 
 function onSyncComplete() {
     ui.showProgress(false);
-    alert('Sync completed successfully!');
+    dialog.success('Sync completed successfully!');
 
     // Refresh comparison
     startCompare();

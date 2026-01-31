@@ -79,6 +79,26 @@ body, input, button {
     font-size: 1em;
 }
 
+button {
+    transition: .1s ease;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    
+    &:hover {
+        filter: brightness(1.05);
+    }
+    
+    &:active {
+        filter: brightness(1.2) contrast(.8);
+    }
+    
+    &:disabled {
+        filter: opacity(.3);
+        cursor: default;
+    }
+}
+
 body {
     background: var(--gray-100);
     color: var(--gray-900);
@@ -141,13 +161,6 @@ main {
     padding: 0.5rem 1rem;
     background: var(--primary);
     color: var(--white);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.path-input button:hover {
-    background: var(--primary-dark);
 }
 
 /* Controls */
@@ -164,9 +177,6 @@ main {
 
 .controls button {
     padding: 0.6rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
 }
 
 #compareBtn {
@@ -174,22 +184,9 @@ main {
     color: var(--white);
 }
 
-#compareBtn:hover {
-    background: var(--success-dark);
-}
-
 #syncBtn {
     background: var(--danger);
     color: var(--white);
-}
-
-#syncBtn:hover:not(:disabled) {
-    background: var(--danger-dark);
-}
-
-#syncBtn:disabled {
-    background: var(--gray-400);
-    cursor: default;
 }
 
 .checkbox-label {
@@ -270,7 +267,7 @@ main {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--success));
+    background: var(--primary);
     width: 0%;
     transition: width 0.3s ease;
 }
@@ -292,9 +289,6 @@ main {
     padding: 0.4rem 1rem;
     background: var(--danger);
     color: var(--white);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
 }
 
 /* Results Table */
@@ -467,10 +461,9 @@ main {
     justify-content: center;
     padding: .15em .25em;
     font-size: 1.2em;
-    border: none;
-    cursor: pointer;
-    transition: .2s ease;
     background: var(--gray-100);
+    border-radius: 0;
+    filter: brightness(.97);
 }
 
 .action-btn:hover:not(:disabled),
@@ -478,13 +471,9 @@ main {
     filter: brightness(.9);
 }
 
-.action-btn:disabled {
-    opacity: 0.3;
-    cursor: default;
-}
-
 .action-btn:disabled .mdi {
     color: var(--gray-400);
+    opacity: .5;
 }
 
 .action-btn .mdi {
@@ -608,11 +597,9 @@ main {
 }
 
 .close-btn {
-    background: none;
-    border: none;
     font-size: 1.5em;
-    cursor: pointer;
     color: var(--gray-500);
+    background-color: transparent;
 }
 
 .browser-path {
@@ -633,15 +620,7 @@ main {
     padding: 0.5rem 1rem;
     background: var(--primary);
     color: var(--white);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s ease;
     font-weight: 500;
-}
-
-.browser-path button:hover {
-    background: var(--primary-dark);
 }
 
 #goUpBtn {
@@ -651,10 +630,6 @@ main {
     justify-content: center;
     background: var(--gray-200);
     color: var(--gray-800);
-}
-
-#goUpBtn:hover {
-    background: var(--gray-300);
 }
 
 #goUpBtn .mdi {
@@ -707,23 +682,11 @@ main {
 
 .modal-footer button {
     padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .modal-footer button:first-child {
     background: var(--success);
     color: var(--white);
-    border: none;
-}
-
-.modal-footer button:first-child:hover {
-    background: var(--success-dark);
-}
-
-.modal-footer button:first-child:active {
-    transform: scale(0.98);
 }
 
 .modal-footer button:last-child {
@@ -732,10 +695,66 @@ main {
     border: 1px solid var(--gray-300);
 }
 
-.modal-footer button:last-child:hover {
-    background: var(--gray-300);
+/* Dialog Modal */
+.dialog-modal {
+    width: 450px;
+    max-width: 90vw;
 }
 
-.modal-footer button:last-child:active {
-    transform: scale(0.98);
+.dialog-body {
+    padding: 1.5rem;
+    font-size: 1em;
+    color: var(--gray-800);
+    line-height: 1.5;
+}
+
+.dialog-modal .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.dialog-modal .modal-footer button {
+    min-width: 80px;
+    padding: 0.6rem 1.25rem;
+    font-weight: 500;
+}
+
+#dialogConfirmBtn {
+    background: var(--primary);
+    color: var(--white);
+}
+
+#dialogCancelBtn {
+    background: var(--gray-200);
+    color: var(--gray-900);
+}
+
+/* Dialog variants for different types */
+.dialog-modal.dialog-alert #dialogConfirmBtn {
+    background: var(--primary);
+}
+
+.dialog-modal.dialog-error #dialogConfirmBtn {
+    background: var(--danger);
+}
+
+.dialog-modal.dialog-error #dialogConfirmBtn:hover {
+    background: var(--danger-dark);
+}
+
+.dialog-modal.dialog-success #dialogConfirmBtn {
+    background: var(--success);
+}
+
+.dialog-modal.dialog-success #dialogConfirmBtn:hover {
+    background: var(--success-dark);
+}
+
+.dialog-modal.dialog-warning #dialogConfirmBtn {
+    background: var(--warning);
+}
+
+.dialog-modal.dialog-warning #dialogConfirmBtn:hover {
+    background: var(--warning-dark);
 }
