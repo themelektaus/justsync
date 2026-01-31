@@ -258,35 +258,51 @@ async function startSync() {
 }
 
 function setAction(path, action) {
-    // Find the button group for this path using a safer approach
-    const buttonGroups = document.querySelectorAll('.action-button-group');
-    let buttonGroup = null;
+    const pathsToUpdate = [path];
 
-    for (const group of buttonGroups) {
-        if (group.dataset.path === path) {
-            buttonGroup = group;
-            break;
+    // Check if this is a folder - if so, find all children recursively
+    const resultItem = compareResults.find(r => r.relativePath === path);
+    if (resultItem && ((resultItem.left && resultItem.left.isDirectory) || (resultItem.right && resultItem.right.isDirectory))) {
+        // This is a folder - find all children (files and subfolders)
+        compareResults.forEach(item => {
+            const itemPath = item.relativePath;
+            // Check if this item is a child of the folder (starts with folder path + separator)
+            if (itemPath !== path && (itemPath.startsWith(path + '\\') || itemPath.startsWith(path + '/'))) {
+                pathsToUpdate.push(itemPath);
+            }
+        });
+    }
+
+    // Update all paths (folder and all children)
+    pathsToUpdate.forEach(pathToUpdate => {
+        const buttonGroups = document.querySelectorAll('.action-button-group');
+        let buttonGroup = null;
+
+        for (const group of buttonGroups) {
+            if (group.dataset.path === pathToUpdate) {
+                buttonGroup = group;
+                break;
+            }
         }
-    }
 
-    if (!buttonGroup) {
-        console.error('Button group not found for path:', path);
-        return;
-    }
+        if (!buttonGroup) {
+            return;
+        }
 
-    // Remove active class from all buttons in this group
-    buttonGroup.querySelectorAll('.action-btn').forEach(btn => {
-        btn.classList.remove('active');
+        // Remove active class from all buttons in this group
+        buttonGroup.querySelectorAll('.action-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Add active class to the clicked button if not disabled
+        const buttons = buttonGroup.querySelectorAll('.action-btn');
+        for (const btn of buttons) {
+            if (btn.dataset.action === action && !btn.disabled) {
+                btn.classList.add('active');
+                break;
+            }
+        }
     });
-
-    // Add active class to the clicked button
-    const buttons = buttonGroup.querySelectorAll('.action-btn');
-    for (const btn of buttons) {
-        if (btn.dataset.action === action && !btn.disabled) {
-            btn.classList.add('active');
-            break;
-        }
-    }
 
     updateSyncButton();
 }

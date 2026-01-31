@@ -1,0 +1,131 @@
+/* Dark Theme Overrides */
+:root {
+    /* Base */
+    --white: #1e1e1e;
+    --black: #ffffff;
+
+    /* Neutral grays - inverted */
+    --gray-50: #2d2d2d;
+    --gray-100: #1e1e1e;
+    --gray-200: #3d3d3d;
+    --gray-300: #4d4d4d;
+    --gray-400: #6d6d6d;
+    --gray-500: #b0b0b0;
+    --gray-600: #c0c0c0;
+    --gray-700: #d0d0d0;
+    --gray-800: #e0e0e0;
+    --gray-900: #f0f0f0;
+
+    /* Primary (blue) - slightly adjusted for dark backgrounds */
+    --primary: #4da6e8;
+    --primary-dark: #3b8fd9;
+    --primary-light: #1a3a52;
+
+    /* Success (green) */
+    --success: #2ecc71;
+    --success-dark: #7eff9e;
+    --success-light: #1a4d2e;
+
+    /* Warning (orange) */
+    --warning: #f39c12;
+    --warning-dark: #ffb84d;
+    --warning-light: #4d3510;
+
+    /* Danger (red) */
+    --danger: #e74c3c;
+    --danger-dark: #ff7b6d;
+    --danger-light: #4d1a16;
+
+    /* Info (light blue) */
+    --info: #1e4d7a;
+    --info-dark: #6ba3d6;
+
+    /* Header */
+    --header-bg: #1a1a1a;
+}
+
+/* Dark mode specific adjustments */
+body {
+    background: #121212;
+}
+
+header {
+    background: #1a1a1a;
+}
+
+header h1 {
+    color: var(--gray-900);
+}
+
+.folder-panel,
+.controls,
+.progress-section,
+.results-section,
+.modal-content {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+/* Status colors for dark mode */
+.status-left-only { background: #1a3d2e; }
+.status-right-only { background: #4d3510; }
+.status-left-newer { background: #1a3a52; }
+.status-right-newer { background: #4d1a1f; }
+.status-different { background: #4d4410; }
+.status-identical { background: var(--gray-100); color: var(--gray-500); }
+
+/* Diff badges for dark mode */
+.diff-left-only {
+    background: #1a4d2e;
+    color: #7eff9e;
+}
+
+.diff-right-only {
+    background: #4d3510;
+    color: #ffd780;
+}
+
+.diff-left-newer {
+    background: #1a3a52;
+    color: #6ba3d6;
+}
+
+.diff-right-newer {
+    background: #4d1a16;
+    color: #ff7b6d;
+}
+
+.diff-different {
+    background: #4d4410;
+    color: #ffeb80;
+}
+
+.diff-identical {
+    background: var(--gray-50);
+    color: var(--gray-600);
+}
+
+/* Modal overlay darker */
+.modal {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* Input fields */
+.path-input input,
+.browser-path input,
+.mode-selector select {
+    background: var(--gray-50);
+    color: var(--gray-900);
+    border-color: var(--gray-300);
+}
+
+.path-input input:focus,
+.browser-path input:focus,
+.mode-selector select:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.action-btn:hover:not(:disabled),
+.action-btn.active {
+    filter: brightness(1.5);
+}
